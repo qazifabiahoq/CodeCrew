@@ -20,6 +20,8 @@ class SecurityAgent(BaseAgent):
     def analyze(self, code: str, language: str) -> list:
         """Analyze code for security vulnerabilities"""
         
+        print(f"🛡️ Security Agent starting analysis for {language} code ({len(code)} chars)")
+        
         prompt = f"""You are an expert security analyst reviewing {language} code for vulnerabilities.
 
 Your job is to identify security issues including:
@@ -59,10 +61,15 @@ LOW: Missing security headers, verbose error messages
 Begin analysis:"""
 
         try:
+            print(f"🛡️ Security Agent calling Hugging Face API...")
             response = self._call_llm(prompt)
+            print(f"🛡️ Security Agent received response: {len(response)} chars")
             findings = self._parse_response(response)
+            print(f"🛡️ Security Agent found {len(findings)} issues")
             self.findings = findings
             return findings
         except Exception as e:
-            print(f"Security Agent Error: {e}")
+            print(f"🛡️ Security Agent ERROR: {e}")
+            import traceback
+            traceback.print_exc()
             return []
