@@ -38,29 +38,52 @@ class BaseAgent:
             try:
                 response = requests.post(self.api_url, headers=headers, json=payload, timeout=45)
                 
+                print(f"[{self.name}] Attempt {attempt + 1}: Status {response.status_code}")
+                
                 if response.status_code == 503:
                     # Model is loading, wait and retry
-                    print(f"{self.name}: Model loading, waiting...")
+                    error_msg = f"{self.name}: Model loading, waiting 10 seconds..."
+                    print(error_msg)
                     time.sleep(10)
                     continue
+                
+                if response.status_code == 429:
+                    # Rate limited
+                    error_msg = f"{self.name}: Rate limited by Hugging Face API"
+                    print(error_msg)
+                    return f"ERROR: Rate limited. Please try again in a few minutes."
                     
                 if response.status_code == 200:
                     result = response.json()
+                    print(f"[{self.name}] Response received: {str(result)[:100]}...")
                     if isinstance(result, list) and len(result) > 0:
-                        return result[0].get('generated_text', '')
+                        text = result[0].get('generated_text', '')
+                        if text:
+                            return text
+                        else:
+                            print(f"[{self.name}] Empty generated_text in response")
                     return ''
                 else:
-                    print(f"{self.name} API Error: {response.status_code}")
-                    return ''
+                    error_msg = f"{self.name} API Error {response.status_code}: {response.text[:200]}"
+                    print(error_msg)
+                    if attempt == max_retries - 1:
+                        return f"ERROR: API returned {response.status_code}"
                     
-            except Exception as e:
-                print(f"{self.name} Error: {e}")
+            except requests.exceptions.Timeout:
+                print(f"{self.name}: Request timeout on attempt {attempt + 1}")
                 if attempt < max_retries - 1:
                     time.sleep(3)
                     continue
-                return ''
+                return "ERROR: Request timeout"
+            except Exception as e:
+                error_msg = f"{self.name} Error: {type(e).__name__}: {str(e)}"
+                print(error_msg)
+                if attempt < max_retries - 1:
+                    time.sleep(3)
+                    continue
+                return f"ERROR: {str(e)}"
         
-        return ''
+        return "ERROR: All retries failed"
     
     def analyze(self, code: str, language: str) -> List[Dict]:
         """
