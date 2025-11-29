@@ -44,6 +44,32 @@ st.markdown("""
         color: #1e293b;
     }
     
+    /* Sidebar text - light color for dark background */
+    [data-testid="stSidebar"] {
+        background-color: #1e293b;
+    }
+    
+    [data-testid="stSidebar"] * {
+        color: #f8fafc !important;
+    }
+    
+    [data-testid="stSidebar"] h1,
+    [data-testid="stSidebar"] h2,
+    [data-testid="stSidebar"] h3,
+    [data-testid="stSidebar"] h4,
+    [data-testid="stSidebar"] h5,
+    [data-testid="stSidebar"] h6 {
+        color: #ffffff !important;
+    }
+    
+    [data-testid="stSidebar"] .stMarkdown {
+        color: #e2e8f0 !important;
+    }
+    
+    [data-testid="stSidebar"] hr {
+        border-color: #475569 !important;
+    }
+    
     /* Code Text Areas */
     .stTextArea textarea {
         font-family: 'Fira Code', monospace !important;
