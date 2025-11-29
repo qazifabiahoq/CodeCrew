@@ -136,6 +136,16 @@ st.markdown("""
         color: #f8fafc !important;
     }
     
+    /* Sidebar selectbox selected value - dark text */
+    [data-testid="stSidebar"] .stSelectbox [data-baseweb="select"] > div {
+        background-color: #ffffff !important;
+        color: #1e293b !important;
+    }
+    
+    [data-testid="stSidebar"] .stSelectbox [data-baseweb="select"] span {
+        color: #1e293b !important;
+    }
+    
     /* Dropdown menu items */
     [data-testid="stSidebar"] [role="option"] {
         color: #1e293b !important;
@@ -144,6 +154,25 @@ st.markdown("""
     
     [data-testid="stSidebar"] [role="option"]:hover {
         background-color: #f1f5f9 !important;
+    }
+    
+    /* Dropdown menu container */
+    [data-testid="stSidebar"] [role="listbox"] {
+        background-color: #ffffff !important;
+    }
+    
+    [data-testid="stSidebar"] [data-baseweb="popover"] {
+        background-color: #ffffff !important;
+    }
+    
+    /* Force all dropdown text to be dark */
+    [data-testid="stSidebar"] .stSelectbox * {
+        color: #1e293b !important;
+    }
+    
+    /* But keep the label light */
+    [data-testid="stSidebar"] .stSelectbox > label {
+        color: #f8fafc !important;
     }
     
     /* Mobile Responsiveness */
