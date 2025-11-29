@@ -635,7 +635,7 @@ st.markdown("---")
 st.markdown("""
 <div style="text-align: center; color: #64748b; font-size: 14px; padding: 2rem 0;">
     <p style="margin: 0;">
-        <strong>CodeCrew</strong> • Built with Streamlit & Ollama
+        <strong>CodeCrew</strong> • Built with Streamlit & Hugging Face
     </p>
     <p style="margin: 4px 0 0 0;">
         Multi-agent AI code review system using specialized AI agents
