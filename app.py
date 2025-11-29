@@ -19,6 +19,11 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
+# Mobile viewport fix
+st.markdown("""
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+""", unsafe_allow_html=True)
+
 # ============================================================================
 # CUSTOM CSS - PROFESSIONAL BRANDING (NO EMOJIS)
 # ============================================================================
@@ -118,6 +123,79 @@ st.markdown("""
         border: 2px solid #e2e8f0 !important;
         border-radius: 8px !important;
         color: #1e293b !important;
+    }
+    
+    /* Sidebar Select Boxes - Light background with dark text */
+    [data-testid="stSidebar"] .stSelectbox > div > div {
+        background-color: #ffffff !important;
+        border: 2px solid #94a3b8 !important;
+        color: #1e293b !important;
+    }
+    
+    [data-testid="stSidebar"] .stSelectbox label {
+        color: #f8fafc !important;
+    }
+    
+    /* Dropdown menu items */
+    [data-testid="stSidebar"] [role="option"] {
+        color: #1e293b !important;
+        background-color: #ffffff !important;
+    }
+    
+    [data-testid="stSidebar"] [role="option"]:hover {
+        background-color: #f1f5f9 !important;
+    }
+    
+    /* Mobile Responsiveness */
+    @media only screen and (max-width: 768px) {
+        .codecrew-title {
+            font-size: 32px !important;
+        }
+        
+        .codecrew-subtitle {
+            font-size: 14px !important;
+        }
+        
+        .codecrew-header {
+            padding: 1.5rem !important;
+        }
+        
+        .stTextArea textarea {
+            font-size: 12px !important;
+        }
+        
+        [data-testid="stMetricValue"] {
+            font-size: 24px !important;
+        }
+        
+        .stButton > button {
+            padding: 10px 20px !important;
+            font-size: 14px !important;
+        }
+        
+        /* Stack columns on mobile */
+        [data-testid="column"] {
+            width: 100% !important;
+            flex: 100% !important;
+        }
+    }
+    
+    @media only screen and (max-width: 480px) {
+        .codecrew-title {
+            font-size: 24px !important;
+        }
+        
+        .codecrew-subtitle {
+            font-size: 12px !important;
+        }
+        
+        h3 {
+            font-size: 18px !important;
+        }
+        
+        .stTextArea textarea {
+            height: 250px !important;
+        }
     }
     
     /* Multi-select */
