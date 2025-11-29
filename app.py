@@ -154,6 +154,7 @@ st.markdown("""
     
     [data-testid="stSidebar"] [role="option"]:hover {
         background-color: #f1f5f9 !important;
+        color: #1e293b !important;
     }
     
     /* Dropdown menu container */
@@ -163,6 +164,31 @@ st.markdown("""
     
     [data-testid="stSidebar"] [data-baseweb="popover"] {
         background-color: #ffffff !important;
+    }
+    
+    /* Force dropdown menu content */
+    [data-testid="stSidebar"] ul[role="listbox"] {
+        background-color: #ffffff !important;
+    }
+    
+    [data-testid="stSidebar"] ul[role="listbox"] li {
+        background-color: #ffffff !important;
+        color: #1e293b !important;
+    }
+    
+    [data-testid="stSidebar"] ul[role="listbox"] li:hover {
+        background-color: #f1f5f9 !important;
+        color: #1e293b !important;
+    }
+    
+    /* Override any dark popover */
+    [data-baseweb="popover"] {
+        background-color: #ffffff !important;
+    }
+    
+    [data-baseweb="popover"] [role="option"] {
+        background-color: #ffffff !important;
+        color: #1e293b !important;
     }
     
     /* Force all dropdown text to be dark */
