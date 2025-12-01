@@ -7,67 +7,91 @@ from typing import Dict, List
 import re
 import requests
 import time
+import os
 
 
 class BaseAgent:
     """Base class for all CodeCrew agents"""
     
-    def __init__(self, name: str, role: str, icon: str, color: str, model: str = "mistralai/Mistral-7B-Instruct-v0.2"):
+    def __init__(self, name: str, role: str, icon: str, color: str, model: str = "llama-3.3-70b-versatile"):
         self.name = name
         self.role = role
         self.icon = icon
         self.color = color
         self.model = model
-        self.api_url = f"https://api-inference.huggingface.co/models/{model}"
+        self.api_url = "https://api.groq.com/openai/v1/chat/completions"
         self.findings: List[Dict] = []
     
     def _call_llm(self, prompt: str, max_retries: int = 3) -> str:
-        """Call Hugging Face Inference API"""
-        headers = {"Content-Type": "application/json"}
+        """Call Groq API (free and fast)"""
+        
+        # Try to get API key from multiple sources
+        api_key = None
+        
+        # Try Streamlit secrets first
+        try:
+            import streamlit as st
+            api_key = st.secrets.get("GROQ_API_KEY", None)
+        except:
+            pass
+        
+        # Fall back to environment variable
+        if not api_key:
+            api_key = os.getenv("GROQ_API_KEY", "")
+        
+        # If still no API key, return error
+        if not api_key:
+            return "ERROR: No GROQ_API_KEY found. Please add it to Streamlit secrets or environment variables."
+        
+        headers = {
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json"
+        }
         
         payload = {
-            "inputs": prompt,
-            "parameters": {
-                "max_new_tokens": 1000,
-                "temperature": 0.1,
-                "return_full_text": False
-            }
+            "model": self.model,
+            "messages": [
+                {
+                    "role": "user",
+                    "content": prompt
+                }
+            ],
+            "temperature": 0.1,
+            "max_tokens": 1500
         }
         
         for attempt in range(max_retries):
             try:
-                response = requests.post(self.api_url, headers=headers, json=payload, timeout=45)
+                response = requests.post(
+                    self.api_url,
+                    headers=headers,
+                    json=payload,
+                    timeout=30
+                )
                 
                 print(f"[{self.name}] Attempt {attempt + 1}: Status {response.status_code}")
                 
-                if response.status_code == 503:
-                    # Model is loading, wait and retry
-                    error_msg = f"{self.name}: Model loading, waiting 10 seconds..."
-                    print(error_msg)
-                    time.sleep(10)
-                    continue
-                
-                if response.status_code == 429:
-                    # Rate limited
-                    error_msg = f"{self.name}: Rate limited by Hugging Face API"
-                    print(error_msg)
-                    return f"ERROR: Rate limited. Please try again in a few minutes."
-                    
                 if response.status_code == 200:
                     result = response.json()
-                    print(f"[{self.name}] Response received: {str(result)[:100]}...")
-                    if isinstance(result, list) and len(result) > 0:
-                        text = result[0].get('generated_text', '')
-                        if text:
-                            return text
-                        else:
-                            print(f"[{self.name}] Empty generated_text in response")
-                    return ''
+                    text = result['choices'][0]['message']['content']
+                    print(f"[{self.name}] Response received: {len(text)} chars")
+                    return text
+                
+                elif response.status_code == 429:
+                    error_msg = f"{self.name}: Rate limited"
+                    print(error_msg)
+                    if attempt < max_retries - 1:
+                        time.sleep(5)
+                        continue
+                    return "ERROR: Rate limited. Please try again in a few minutes."
+                
                 else:
                     error_msg = f"{self.name} API Error {response.status_code}: {response.text[:200]}"
                     print(error_msg)
-                    if attempt == max_retries - 1:
-                        return f"ERROR: API returned {response.status_code}"
+                    if attempt < max_retries - 1:
+                        time.sleep(3)
+                        continue
+                    return f"ERROR: API returned {response.status_code}"
                     
             except requests.exceptions.Timeout:
                 print(f"{self.name}: Request timeout on attempt {attempt + 1}")
@@ -75,6 +99,7 @@ class BaseAgent:
                     time.sleep(3)
                     continue
                 return "ERROR: Request timeout"
+            
             except Exception as e:
                 error_msg = f"{self.name} Error: {type(e).__name__}: {str(e)}"
                 print(error_msg)
@@ -98,7 +123,13 @@ class BaseAgent:
         """
         findings = []
         
-        if not response or "NO_ISSUES_FOUND" in response.upper():
+        # Check for errors
+        if not response or response.startswith("ERROR:"):
+            print(f"[{self.name}] Skipping parse due to error response")
+            return findings
+        
+        if "NO_ISSUES_FOUND" in response.upper():
+            print(f"[{self.name}] No issues found in code")
             return findings
         
         # Split by separator
@@ -139,7 +170,9 @@ class BaseAgent:
                 finding['icon'] = self.icon
                 finding['color'] = self.color
                 findings.append(finding)
+                print(f"[{self.name}] Parsed finding: {finding['severity']} - {finding['issue'][:50]}")
         
+        print(f"[{self.name}] Total findings parsed: {len(findings)}")
         return findings
     
     def get_status_message(self, status: str = "analyzing") -> str:
